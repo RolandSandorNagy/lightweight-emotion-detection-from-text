@@ -21,6 +21,22 @@ Emotion detection from text is often treated as a standard multi-label classific
 
 This project investigates lightweight transformer-based emotion detection under explicit resource constraints, with a particular focus on improving performance on rare (tail) emotion categories. The goal is to move beyond unconstrained model comparison and instead study model and decision strategies within clearly defined deployment scenarios.
 
+\section{Conceptual Framing of Emotion}
+
+Emotion in text can be interpreted in multiple ways:
+
+\begin{itemize}
+    \item \textbf{Writer-internal emotion:} the actual psychological state of the author at the time of writing.
+    \item \textbf{Expressed emotion:} the emotion conveyed or expressed in the text.
+    \item \textbf{Reader-evoked emotion:} the emotion elicited in the reader.
+\end{itemize}
+
+These interpretations are not necessarily equivalent. For example, a text may describe anger without the author being angry, or may evoke fear in the reader without explicitly expressing fear.
+
+The GoEmotions dataset operationalizes emotion as the perceived expressed emotion in the text, based on human annotation.
+
+Therefore, this project models \emph{perceived expressed emotion}, rather than attempting to infer the author's internal psychological state or the reader's emotional reaction.
+
 \section{Dataset}
 
 Primary dataset:
