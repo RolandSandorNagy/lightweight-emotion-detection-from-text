@@ -1,0 +1,175 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=2.5cm]{geometry}
+\usepackage{enumitem}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\title{AI Lab I--II Research Proposal (v0.1)\\
+Constraint-Aware Lightweight Multi-Label Emotion Detection}
+\author{Roland Sándor Nagy}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\section{Motivation}
+
+Emotion detection from text is often treated as a standard multi-label classification problem, where models are evaluated primarily using global metrics (e.g., micro-F1). However, in realistic applications certain emotion categories may be rare but more critical than others.
+
+This project investigates lightweight transformer-based emotion detection under explicit resource constraints, with a particular focus on improving performance on rare (tail) emotion categories. The goal is to move beyond unconstrained model comparison and instead study model and decision strategies within clearly defined deployment scenarios.
+
+\section{Dataset}
+
+Primary dataset:
+\begin{itemize}
+    \item GoEmotions (28-label multi-label emotion classification dataset)
+\end{itemize}
+
+Optional extension (if needed for generalization analysis):
+\begin{itemize}
+    \item Additional public emotion dataset (to be determined)
+\end{itemize}
+
+\section{Scenario Definitions}
+
+\subsection{Scenario B (Primary Proposal): Tail / Critical Emotion Focus}
+
+\textbf{Application context:}  
+A wellbeing or monitoring system where rare but critical emotion categories must be detected reliably.
+
+\textbf{Objective:}
+\begin{itemize}
+    \item Maximize macro-F1.
+    \item Prioritize recall on tail (low-frequency) emotion categories.
+\end{itemize}
+
+\textbf{Resource constraints (initial proposal, subject to confirmation):}
+\begin{itemize}
+    \item Model size $\leq$ 120M parameters.
+    \item GPU memory usage $\leq$ 12 GB.
+    \item Inference latency target $<$ 100 ms per request (batch size = 1).
+\end{itemize}
+
+\textbf{Optimization formulation:}
+
+Let $\mathcal{M}$ denote the set of candidate transformer models and $\mathcal{D}$ the set of decision strategies (thresholding and calibration methods). The goal is to solve:
+
+\[
+\max_{m \in \mathcal{M},\, d \in \mathcal{D}} \; \text{Macro-F1}_{tail}(m, d)
+\]
+
+subject to:
+
+\[
+\text{Params}(m) \leq 120M,
+\]
+\[
+\text{Memory}(m) \leq 12GB,
+\]
+\[
+\text{Latency}(m) \leq 100ms.
+\]
+
+\textbf{Constraint-aware research question:}
+
+Given the above constraints, which transformer architectures and decision strategies satisfy the limits, and among those, which configuration maximizes performance on rare emotion categories?
+
+This scenario serves as the primary experimental setting of the project.
+
+\subsection{Scenario A: Cost / Latency-Constrained Serving}
+
+\textbf{Application context:}  
+A high-throughput text annotation API.
+
+\textbf{Objective:}
+\begin{itemize}
+    \item Maximize macro-F1 under strict latency and cost constraints.
+\end{itemize}
+
+\textbf{Resource constraints (initial proposal):}
+\begin{itemize}
+    \item Latency (p95) $<$ 50 ms.
+    \item Model size $\leq$ 60--100M parameters.
+    \item GPU memory $\leq$ 12 GB.
+\end{itemize}
+
+\textbf{Research question:}
+
+Which models provide the best performance under the defined latency and size constraints, and how does performance degrade as constraints become stricter?
+
+\subsection{Scenario C: Strict Model Size Cap (Edge-like Environment)}
+
+\textbf{Application context:}  
+Deployment in a strongly resource-constrained environment (e.g., low-cost CPU server or edge device).
+
+\textbf{Objective:}
+\begin{itemize}
+    \item Maintain acceptable macro-F1 under strict model size limits.
+\end{itemize}
+
+\textbf{Resource constraints (initial proposal):}
+\begin{itemize}
+    \item Model size $\leq$ 30M parameters.
+    \item CPU inference time $<$ 200 ms per request.
+\end{itemize}
+
+\textbf{Research question:}
+
+Under strict model size and inference constraints, which architectures remain viable, and how do decision strategies (thresholding, calibration) affect performance within these limits?
+
+\section{Core Methodological Components}
+
+Across scenarios, the following aspects will be studied:
+
+\begin{itemize}
+    \item Multi-label training using transformer models (e.g., BERT-base, DistilBERT, MiniLM).
+    \item Decision strategies:
+    \begin{itemize}
+        \item Fixed threshold (0.5).
+        \item Global optimized threshold.
+        \item Per-class optimized threshold.
+    \end{itemize}
+    \item Calibration techniques (e.g., temperature scaling).
+    \item Comparison of multi-label vs single-label formulations (especially for tail categories).
+\end{itemize}
+
+\section{Evaluation Protocol}
+
+\begin{itemize}
+    \item Micro-F1.
+    \item Macro-F1.
+    \item Macro-F1 computed specifically on tail labels.
+    \item Per-class F1 and recall.
+    \item Tail-label slice metrics.
+    \item Latency measurement.
+    \item Model parameter count and memory footprint.
+\end{itemize}
+
+\textbf{Definition of tail labels:}
+
+Tail labels are defined as the bottom 30\% of emotion categories ranked by frequency in the training set. Sensitivity analysis with alternative thresholds (e.g., bottom 20\% and bottom 40\%) will also be performed.
+
+\section{Hypotheses (Initial)}
+
+\begin{itemize}
+    \item H1:: Per-class threshold optimization yields statistically significant improvement in tail-label macro-F1 compared to a fixed 0.5 threshold.
+    \item H2: Calibration improves stability and generalization of threshold-based decisions.
+    \item H3: Single-label simplification reduces performance on rare emotion categories compared to multi-label modeling.
+\end{itemize}
+
+\section{Expected Contributions}
+
+\begin{itemize}
+    \item A constraint-aware evaluation framework for lightweight multi-label emotion detection.
+    \item Empirical analysis of thresholding and calibration under tail-priority settings.
+    \item Comparative study of lightweight transformer models under explicit deployment constraints.
+\end{itemize}
+
+\section{Preferred Direction}
+
+Among the three scenarios, Scenario B (Tail / Critical Emotion Focus) is proposed as the primary research direction due to its stronger methodological and application relevance. Scenario A elements (explicit resource constraints) are incorporated to ensure a well-defined and practically grounded problem setting.
+
+\end{document}
