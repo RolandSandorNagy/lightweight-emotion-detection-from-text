@@ -41,7 +41,9 @@ Key aspects:
 
 
 ├── proposal/ # Research proposal documents
+
 ├── configs/ # Training & experiment configs
+
 ├── src/ # Source code
 │ ├── data/
 │ ├── models/
