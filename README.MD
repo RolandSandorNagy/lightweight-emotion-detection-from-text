@@ -41,25 +41,25 @@ Key aspects:
 
 
 ├── proposal/ # Research proposal documents
-
+│
 ├── configs/ # Training & experiment configs
-
+│
 ├── src/ # Source code
-
+│ │
 │ ├── data/
-
+│ │
 │ ├── models/
-
+│ │
 │ ├── training/
-
+│ │
 │ ├── evaluation/
-
+│ │
 │ └── utils/
-
+│
 ├── experiments/ # Saved experiment logs and results
-
+│
 ├── notebooks/ # Exploratory notebooks (optional)
-
+│
 └── README.md
 
 
