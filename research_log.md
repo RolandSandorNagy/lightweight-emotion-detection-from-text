@@ -593,3 +593,203 @@ Evaluate whether the improved tail recall at low threshold corresponds to meanin
 
 ### Conclusion
 The 5000-sample baseline achieves non-trivial tail-label detection at low threshold, but the precision-recall trade-off remains substantial. Further improvement likely requires tail-aware learning beyond threshold selection alone.
+
+---
+
+## Experiment 10 – Class-weighted loss on the 5000-sample training subset
+
+**Date:** 2026-04-10
+
+### Goal
+Test whether class-weighted loss improves rare-label detection more effectively than thresholding or oversampling.
+
+### Setup
+- Dataset: GoEmotions (full 28-label multi-label version)
+- Model: distilbert-base-uncased
+- Task: multi-label classification
+- Label encoding: multi-hot vectors
+- Train size: 5000
+- Validation size: 500
+- Epochs: 3
+- Batch size: 16
+- Loss: BCEWithLogitsLoss with class-dependent positive weights
+- Tail labels:
+  - grief (16)
+  - pride (21)
+  - relief (23)
+  - nervousness (19)
+  - embarrassment (12)
+  - remorse (24)
+  - fear (14)
+  - desire (8)
+
+### Eval results at default threshold 0.5
+- Eval loss: 0.9538329839706421
+- Eval Micro-F1: 0.3719
+- Eval Macro-F1: 0.3455
+- Eval Tail Recall: 0.7156
+- Max predicted probability on validation set: 0.9778
+- Mean predicted probability on validation set: 0.2265
+
+### Threshold sweep
+- Threshold 0.05:
+  - Micro-F1: 0.1014
+  - Macro-F1: 0.0884
+  - Tail Recall: 0.9688
+- Threshold 0.10:
+  - Micro-F1: 0.1329
+  - Macro-F1: 0.1123
+  - Tail Recall: 0.9281
+- Threshold 0.15:
+  - Micro-F1: 0.1637
+  - Macro-F1: 0.1402
+  - Tail Recall: 0.8969
+- Threshold 0.20:
+  - Micro-F1: 0.1923
+  - Macro-F1: 0.1664
+  - Tail Recall: 0.7469
+- Threshold 0.25:
+  - Micro-F1: 0.2224
+  - Macro-F1: 0.1975
+  - Tail Recall: 0.7469
+- Threshold 0.30:
+  - Micro-F1: 0.2555
+  - Macro-F1: 0.2341
+  - Tail Recall: 0.7469
+
+### Observations
+- Class-weighted loss strongly increases tail-label recall.
+- However, this comes at a substantial cost in Micro-F1 compared to the oversampling-based runs.
+- The model outputs are much more positive overall than in previous experiments, suggesting overcorrection toward rare labels.
+- This indicates that weighting is effective for tail sensitivity, but currently too aggressive for balanced performance.
+
+### Conclusion
+Class-weighted loss successfully improves rare-label recall, but in its current form it overcompensates and degrades overall performance. Compared with oversampling, it appears less balanced, even though it achieves much higher tail recall.
+
+---
+
+## Experiment 11 – High-threshold analysis on class-weighted model
+
+### Goal
+Investigate whether higher thresholds improve the balance between overall performance and tail recall for the class-weighted model.
+
+### Setup
+- Same trained model as in Experiment 10
+- No retraining
+- Thresholds tested: 0.35–0.7
+
+### Results (selected)
+
+- Threshold 0.5:
+  - Micro-F1: 0.3719
+  - Macro-F1: 0.3455
+  - Tail Recall: 0.7156
+
+- Threshold 0.6:
+  - Micro-F1: 0.4228
+  - Macro-F1: 0.3881
+  - Tail Recall: 0.5810
+
+- Threshold 0.7:
+  - Micro-F1: 0.4560
+  - Macro-F1: 0.4219
+  - Tail Recall: 0.5714
+
+### Observations
+- Increasing the threshold significantly improves Micro-F1 and Macro-F1.
+- Tail recall remains high even at relatively large thresholds.
+- The optimal threshold for the weighted model is substantially higher than for the baseline models.
+- This indicates that class-weighted training shifts the calibration of model outputs.
+
+### Conclusion
+Contrary to initial expectations, the class-weighted model is not inherently worse than the oversampling-based approach. When evaluated with appropriate (higher) thresholds, it achieves substantially better macro-F1 and tail recall, while maintaining competitive micro-F1. This suggests that class-weighted loss is a strong candidate for tail-focused scenarios.
+
+---
+
+## Experiment 12 – Oversampling + class-weighted loss
+
+**Date:** 2026-04-10
+
+### Goal
+Test whether combining oversampling with class-weighted loss further improves rare-label detection compared to either method alone.
+
+### Setup
+- Base training subset: 5000 samples
+- Tail-containing examples duplicated once (oversampling)
+- Oversampled train size: 5295
+- Model: distilbert-base-uncased
+- Task: multi-label classification
+- Loss: BCEWithLogitsLoss with class-dependent positive weights
+- Epochs: 3
+- Batch size: 16
+
+### Eval results (threshold = 0.5)
+- Micro-F1: 0.3924
+- Macro-F1: 0.3686
+- Tail Recall: 0.7562
+
+### Threshold sweep (selected)
+
+- Threshold 0.5:
+  - Micro-F1: 0.3924
+  - Macro-F1: 0.3686
+  - Tail Recall: 0.7562
+
+- Threshold 0.6:
+  - Micro-F1: 0.4322
+  - Macro-F1: 0.3982
+  - Tail Recall: 0.7312
+
+- Threshold 0.7:
+  - Micro-F1: 0.4579
+  - Macro-F1: 0.4302
+  - Tail Recall: 0.7216
+
+### Observations
+- Combining oversampling with weighted loss produces the highest macro-F1 observed so far.
+- Tail recall remains very high even at larger thresholds.
+- Compared to weighted loss alone, the combination slightly improves stability and overall performance.
+- The model still requires higher thresholds for optimal performance.
+
+### Conclusion
+Oversampling and class-weighted loss are complementary techniques. Their combination yields the strongest performance for rare-label detection, achieving the best macro-F1 and tail recall among all tested methods.
+
+---
+
+## Experiment 13 – Per-class thresholding on oversampling + weighted model
+
+**Date:** 2026-04-10
+
+### Goal
+Evaluate whether per-class thresholding further improves performance compared to a global threshold on the best-performing model.
+
+### Setup
+- Model: oversampling + class-weighted loss (Experiment 12)
+- No retraining
+- Default threshold for non-tail labels: 0.6–0.7
+- Lower thresholds for tail labels: 0.5–0.6
+
+### Results
+
+- default=0.7, tail=0.5:
+  - Micro-F1: 0.4458
+  - Macro-F1: 0.4087
+  - Tail Recall: 0.7562
+
+- default=0.7, tail=0.6:
+  - Micro-F1: 0.4518
+  - Macro-F1: 0.4163
+  - Tail Recall: 0.7312
+
+- default=0.6, tail=0.5:
+  - Micro-F1: 0.4276
+  - Macro-F1: 0.3905
+  - Tail Recall: 0.7562
+
+### Observations
+- Per-class thresholding slightly increases tail recall.
+- However, this comes with a small decrease in macro-F1 and micro-F1.
+- The best global threshold setting remains competitive with or better than per-class configurations.
+
+### Conclusion
+Per-class thresholding provides only marginal gains over a well-tuned global threshold. The primary performance improvements come from training-time strategies (oversampling and class-weighted loss), while thresholding plays a secondary role.
