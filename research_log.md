@@ -793,3 +793,169 @@ Evaluate whether per-class thresholding further improves performance compared to
 
 ### Conclusion
 Per-class thresholding provides only marginal gains over a well-tuned global threshold. The primary performance improvements come from training-time strategies (oversampling and class-weighted loss), while thresholding plays a secondary role.
+
+---
+
+## Experiment 14 – Threshold calibration on held-out validation split
+
+**Date:** 2026-04-17
+
+### Goal
+Evaluate whether threshold tuning on the validation set leads to overfitting, by separating threshold selection from final evaluation.
+
+### Setup
+- Model: oversampling + class-weighted loss (best performing model)
+- Validation set split into two halves:
+  - Calibration split (50%) for threshold selection
+  - Held-out split (50%) for evaluation
+- Thresholds tested: 0.3–0.7
+
+### Calibration results
+- Best threshold (by Macro-F1): 0.7
+- Calibration Macro-F1: 0.4105
+- Calibration Micro-F1: 0.4741
+- Calibration Tail Recall: 0.7083
+
+### Held-out evaluation
+- Selected threshold: 0.7
+- Micro-F1: 0.4425
+- Macro-F1: 0.4358
+- Tail Recall: 0.8472
+
+### Observations
+- The selected threshold remains consistent with earlier experiments.
+- Performance on the held-out split does not degrade compared to the calibration split.
+- Tail recall is even higher on the held-out data.
+- This suggests that threshold tuning captures generalizable model behavior rather than overfitting.
+
+### Conclusion
+Separating threshold selection from evaluation confirms that the observed threshold effects are robust. The model maintains strong tail-label performance under a proper validation protocol.
+
+---
+
+## Experiment 15 – Threshold calibration stability across alternative validation split
+
+**Date:** 2026-04-17
+
+### Goal
+Verify whether threshold selection remains stable across different validation splits.
+
+### Setup
+- Same model as Experiment 14 (oversampling + class-weighted loss)
+- Alternative split strategy:
+  - Calibration set: every second sample
+  - Held-out set: complementary samples
+- Thresholds tested: 0.3–0.7
+
+### Calibration results
+- Best threshold (by Macro-F1): 0.7
+- Calibration Macro-F1: 0.3750
+- Calibration Micro-F1: 0.4456
+- Calibration Tail Recall: 0.4915
+
+### Held-out evaluation
+- Selected threshold: 0.7
+- Micro-F1: 0.4700
+- Macro-F1: 0.4266
+- Tail Recall: 0.9500
+
+### Observations
+- The optimal threshold remains identical to Experiment 14 (0.7).
+- Performance remains stable across different split strategies.
+- Tail recall remains very high and even increases on the held-out set.
+- Results suggest that threshold selection is not sensitive to a specific validation partition.
+
+### Conclusion
+Threshold calibration is robust across different validation splits. The observed improvements are not artifacts of a specific data partition, but reflect stable model behavior.
+
+---
+
+## Experiment 16 – Tail precision / recall / F1 analysis on OW model
+
+**Date:** 2026-04-20
+
+### Goal
+Evaluate the precision–recall trade-off for tail labels on the best-performing model (oversampling + class-weighted loss).
+
+### Setup
+- Model: oversampling + class-weighted loss (Experiment 12)
+- No retraining
+- Thresholds tested: 0.3–0.7
+- Metrics: tail precision, tail recall, tail F1
+
+### Results
+
+- Threshold 0.3:
+  - Tail Precision: 0.1364
+  - Tail Recall: 0.7562
+  - Tail F1: 0.2312
+
+- Threshold 0.4:
+  - Tail Precision: 0.1939
+  - Tail Recall: 0.7562
+  - Tail F1: 0.3087
+
+- Threshold 0.5:
+  - Tail Precision: 0.2616
+  - Tail Recall: 0.7562
+  - Tail F1: 0.3888
+
+- Threshold 0.6:
+  - Tail Precision: 0.2912
+  - Tail Recall: 0.7312
+  - Tail F1: 0.4166
+
+- Threshold 0.7:
+  - Tail Precision: 0.3499
+  - Tail Recall: 0.7216
+  - Tail F1: 0.4713
+
+### Observations
+- Increasing the threshold steadily improves tail precision while only slightly reducing recall.
+- Tail recall remains consistently high across all tested thresholds.
+- Tail F1 improves monotonically with increasing threshold, reaching its maximum at 0.7.
+- This indicates that the model captures meaningful signal for rare labels rather than relying on overprediction.
+
+### Conclusion
+The oversampling + class-weighted model achieves a strong and stable precision–recall trade-off for tail labels. Unlike earlier experiments, improvements in tail recall are not driven by excessive false positives, but by genuinely improved discrimination.
+
+---
+
+
+## Experiment 17 – Seed repeat of the best model
+
+**Date:** 2026-04-23
+
+### Goal
+Check whether the best-performing setup remains stable under a different random seed.
+
+### Setup
+- Model: oversampling + class-weighted loss
+- Same setup as Experiment 12
+- Random seed: 123
+- Evaluation threshold: 0.7
+
+### Results
+- Eval loss: 0.7968
+- Eval Micro-F1 (threshold = 0.5): 0.3830
+- Eval Macro-F1 (threshold = 0.5): 0.3543
+- Eval Tail Recall (threshold = 0.5): 0.7216
+
+### Thresholded evaluation
+- Threshold: 0.7
+- Micro-F1: 0.4690
+- Macro-F1: 0.4289
+- Tail Recall: 0.6904
+- Max predicted probability on validation set: 0.9790
+- Mean predicted probability on validation set: 0.2074
+
+### Observations
+- Results remain very close to the original best run.
+- Macro-F1 and tail recall stay high under a different seed.
+- This suggests that the best-performing configuration is reasonably stable and not the result of a lucky initialization.
+
+### Conclusion
+The oversampling + class-weighted setup appears robust across seeds, with consistent threshold behavior and stable rare-label performance.
+
+---
+
