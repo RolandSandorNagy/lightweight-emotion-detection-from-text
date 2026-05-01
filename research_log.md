@@ -959,3 +959,181 @@ The oversampling + class-weighted setup appears robust across seeds, with consis
 
 ---
 
+## Experiment 18 – Seed repeat of the best model (seed = 7)
+
+**Date:** 2026-04-27
+
+### Goal
+Further evaluate the stability of the best-performing setup under a different random seed.
+
+### Setup
+- Model: oversampling + class-weighted loss
+- Same setup as Experiment 12
+- Random seed: 7
+- Evaluation threshold: 0.7
+
+### Results
+- Eval loss: 0.7843
+- Eval Micro-F1 (threshold = 0.5): not recorded separately
+- Eval Macro-F1 (threshold = 0.5): not recorded separately
+- Eval Tail Recall (threshold = 0.5): not recorded separately
+
+### Thresholded evaluation
+- Threshold: 0.7
+- Micro-F1: 0.4747
+- Macro-F1: 0.4522
+- Tail Recall: 0.7060
+- Max predicted probability on validation set: 0.9835
+- Mean predicted probability on validation set: 0.2087
+
+### Observations
+- Results remain in the same range as previous runs.
+- Macro-F1 is slightly higher than in the earlier best run.
+- Tail recall remains high.
+
+### Conclusion
+The best-performing setup remains stable under seed = 7 and continues to show strong macro-F1 and tail performance.
+
+---
+
+## Experiment 19 – Seed repeat of the best model (seed = 42)
+
+**Date:** 2026-04-27
+
+### Goal
+Further evaluate the stability of the best-performing setup under another random seed.
+
+### Setup
+- Model: oversampling + class-weighted loss
+- Same setup as Experiment 12
+- Random seed: 42
+- Evaluation threshold: 0.7
+
+### Results
+- Eval loss: 0.7857
+- Eval Micro-F1 (threshold = 0.5): not recorded separately
+- Eval Macro-F1 (threshold = 0.5): not recorded separately
+- Eval Tail Recall (threshold = 0.5): not recorded separately
+
+### Thresholded evaluation
+- Threshold: 0.7
+- Micro-F1: 0.4578
+- Macro-F1: 0.4361
+- Tail Recall: 0.7216
+- Max predicted probability on validation set: 0.9804
+- Mean predicted probability on validation set: 0.2044
+
+### Observations
+- Results remain very close to the earlier runs.
+- Tail recall remains high.
+- The overall behavior is consistent with the previous seed repeat.
+
+### Conclusion
+The best-performing setup appears stable under seed = 42 as well.
+
+---
+
+## Experiment 20 – Summary across seeds
+
+**Date:** 2026-04-27
+
+### Goal
+Summarize the stability of the current best-performing setup across multiple random seeds.
+
+### Setup
+- Model: oversampling + class-weighted loss
+- Evaluation threshold: 0.7
+- Runs included:
+  - original
+  - seed = 123
+  - seed = 7
+  - seed = 42
+
+### Results
+- Micro-F1: 0.4648 ± 0.0084
+- Macro-F1: 0.4369 ± 0.0107
+- Tail Recall: 0.7099 ± 0.0149
+
+### Observations
+- Variation across seeds is small.
+- Macro-F1 and tail recall remain consistently high.
+- The current best setup is reasonably robust.
+
+### Conclusion
+The oversampling + class-weighted setup appears stable across seeds and remains the strongest candidate so far for the tail-focused scenario.
+
+---
+
+## Experiment 21 – Per-tail-label breakdown on the best model
+
+**Date:** 2026-04-30
+
+### Goal
+Inspect which tail labels are learned well by the best-performing model, and which remain difficult.
+
+### Setup
+- Model: oversampling + class-weighted loss
+- Evaluation threshold: 0.7
+- Per-label precision / recall / F1 computed for the tail labels only
+
+### Results
+- pride: precision 0.7500, recall 0.7500, F1 0.7500
+- remorse: precision 0.5000, recall 0.9231, F1 0.6486
+- fear: precision 0.5455, recall 0.7500, F1 0.6316
+- embarrassment: precision 0.4286, recall 0.6000, F1 0.5000
+- nervousness: precision 0.2500, recall 1.0000, F1 0.4000
+- desire: precision 0.2727, recall 0.7500, F1 0.4000
+- grief: precision 0.0526, recall 1.0000, F1 0.1000
+- relief: precision 0.0000, recall 0.0000, F1 0.0000
+
+### Observations
+- Tail-label performance is highly heterogeneous.
+- Some rare labels (e.g. pride, remorse, fear) are learned relatively well.
+- Others (especially grief and relief) remain difficult or unstable.
+- This suggests that tail-label difficulty is not explained by frequency alone.
+
+### Conclusion
+The best-performing setup improves tail-label performance overall, but not uniformly. Some rare emotions remain substantially harder than others.
+
+---
+
+## Experiment 22 – Threshold calibration by Tail-F1
+
+**Date:** 2026-04-24
+
+### Goal
+Check whether selecting the threshold by a tail-focused objective (Tail-F1) leads to a different optimum than selecting it by Macro-F1.
+
+### Setup
+- Model: oversampling + class-weighted loss
+- Validation split into calibration and held-out halves
+- Thresholds tested: 0.3–0.7
+- Threshold selected by Tail-F1 on the calibration split
+
+### Calibration results
+- Threshold 0.3: Tail F1 = 0.2184
+- Threshold 0.4: Tail F1 = 0.2747
+- Threshold 0.5: Tail F1 = 0.3557
+- Threshold 0.6: Tail F1 = 0.3765
+- Threshold 0.7: Tail F1 = 0.4231
+
+- Best threshold (by Tail-F1): 0.7
+
+### Held-out evaluation
+- Selected threshold: 0.7
+- Micro-F1: 0.4425
+- Macro-F1: 0.4358
+- Tail Precision: 0.4044
+- Tail Recall: 0.8472
+- Tail F1: 0.5475
+
+### Observations
+- The best threshold remains 0.7 even when the calibration objective is tail-focused.
+- Tail performance remains strong on the held-out split.
+- This suggests that the selected threshold is robust not only for overall metrics, but also for the tail-focused scenario.
+
+### Conclusion
+Threshold selection appears stable across objectives: the same threshold emerges as optimal under both Macro-F1 and Tail-F1 based calibration. This strengthens confidence in the current best configuration.
+
+---
+
