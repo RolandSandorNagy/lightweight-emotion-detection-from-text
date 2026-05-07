@@ -1099,7 +1099,7 @@ The best-performing setup improves tail-label performance overall, but not unifo
 
 ## Experiment 22 – Threshold calibration by Tail-F1
 
-**Date:** 2026-04-24
+**Date:** 2026-04-30
 
 ### Goal
 Check whether selecting the threshold by a tail-focused objective (Tail-F1) leads to a different optimum than selecting it by Macro-F1.
