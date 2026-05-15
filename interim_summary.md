@@ -12,6 +12,7 @@ Constraint-Aware Emotion Detection (GoEmotions)
 | Baseline (5000, 3 epochs) | 0.05 | 0.3533 | 0.2657 | 0.3029 | Tail-oriented threshold |
 | Oversampling | 0.25 | 0.5573 | 0.3555 | 0.2464 | Best Micro-F1 observed with oversampling |
 | Weighted loss | 0.70 | 0.4560 | 0.4219 | 0.5714 | Strong tail-focused setup |
+| Weighted-only seed summary | 0.70 | 0.4496 ± 0.0118 | 0.4231 ± 0.0049 | 0.6267 ± 0.0750 | Mean ± std across 3 runs |
 | Oversampling + weighted loss | 0.70 | 0.4579 | 0.4302 | 0.7216 | Best overall trade-off |
 | OW + per-class threshold | default=0.7, tail=0.6 | 0.4518 | 0.4163 | 0.7312 | Slightly higher tail recall, slightly lower overall performance |
 | OW + held-out calibration | 0.70 | 0.4425 | 0.4358 | 0.8472 | Threshold selected on calibration half |
@@ -32,6 +33,7 @@ Constraint-Aware Emotion Detection (GoEmotions)
 - Threshold calibration appears stable across different validation splits.
 - The current best setup also appears reasonably robust across random seeds.
 - Tail labels are heterogeneous: some rare categories are learned relatively well, while others remain difficult.
+- The weighted-only configuration remains a strong comparison point, but the current evidence suggests that OW is both stronger on average and more stable, especially in tail recall.
 
 ## Current Best Configuration
 
@@ -76,6 +78,7 @@ Held-out result in this setting:
 
 ## Suggested Next Steps
 
-- Extend the multi-seed evaluation of the best 1–2 configurations.
-- Prepare a cleaner comparison of the strongest setups for later write-up.
-- Decide whether to deepen the current best setup or test one additional nearby variation.
+- Focus primarily on the OW configuration as the main experimental direction.
+- Keep weighted-only as the main comparison / control setup.
+- Extend the multi-seed evaluation further only for the strongest 1–2 configurations.
+- Prepare a cleaner comparison of the final candidate setups for later write-up.

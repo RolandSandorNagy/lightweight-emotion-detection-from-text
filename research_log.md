@@ -1137,3 +1137,101 @@ Threshold selection appears stable across objectives: the same threshold emerges
 
 ---
 
+## Experiment 23 – Weighted-only seed repeat (seed = 7)
+
+**Date:** 2026-05-13
+
+### Goal
+Further evaluate the stability of the weighted-only configuration under a different random seed.
+
+### Setup
+- Model: class-weighted loss only
+- Same base setup as Experiment 10
+- Training subset: 5000 samples
+- Validation subset: 500 samples
+- Random seed: 7
+- Evaluation threshold: 0.7
+
+### Results
+- Eval loss: 0.9359
+- Thresholded evaluation:
+  - Micro-F1: 0.4568
+  - Macro-F1: 0.4285
+  - Tail Recall: 0.5966
+- Max predicted probability on validation set: 0.9773
+- Mean predicted probability on validation set: 0.2285
+
+### Observations
+- Results remain in the same range as the original weighted-only run.
+- Macro-F1 stays strong, while tail recall remains clearly above the plain baseline.
+- The weighted-only setup appears reasonably stable, but tail performance is still lower than in the OW setting.
+
+### Conclusion
+The weighted-only configuration remains a viable tail-focused setup under seed = 7, but does not yet match the strongest OW results.
+
+---
+
+## Experiment 24 – Weighted-only seed repeat (seed = 42)
+
+**Date:** 2026-05-13
+
+### Goal
+Further evaluate the stability of the weighted-only configuration under another random seed.
+
+### Setup
+- Model: class-weighted loss only
+- Same base setup as Experiment 10
+- Training subset: 5000 samples
+- Validation subset: 500 samples
+- Random seed: 42
+- Evaluation threshold: 0.7
+
+### Results
+- Eval loss: 0.9301
+- Thresholded evaluation:
+  - Micro-F1: 0.4359
+  - Macro-F1: 0.4189
+  - Tail Recall: 0.7120
+- Max predicted probability on validation set: 0.9758
+- Mean predicted probability on validation set: 0.2278
+
+### Observations
+- This run again confirms that the weighted-only setup remains competitive at threshold 0.7.
+- Tail recall is substantially higher here than in the original weighted-only run.
+- However, performance appears somewhat more variable than in the OW configuration, especially for tail recall.
+
+### Conclusion
+The weighted-only setup remains strong across seeds, but its tail behavior appears less stable than OW.
+
+---
+
+## Experiment 25 – Weighted-only summary across runs
+
+**Date:** 2026-05-13
+
+### Goal
+Summarize the stability of the weighted-only configuration across multiple runs.
+
+### Setup
+- Model: class-weighted loss only
+- Evaluation threshold: 0.7
+- Runs included:
+  - original
+  - seed = 7
+  - seed = 42
+
+### Results
+- Micro-F1: 0.4496 ± 0.0118
+- Macro-F1: 0.4231 ± 0.0049
+- Tail Recall: 0.6267 ± 0.0750
+
+### Observations
+- The weighted-only configuration is fairly stable in Micro-F1 and Macro-F1.
+- Tail Recall is more variable across seeds than in the OW setup.
+- Compared to the current OW summary, weighted-only remains weaker on average in all three key metrics, and especially less stable in tail recall.
+
+### Conclusion
+The weighted-only configuration is a useful comparison point and remains a strong tail-focused baseline, but the current evidence still favors the OW setup as the main direction.
+
+---
+
