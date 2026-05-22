@@ -1235,3 +1235,286 @@ The weighted-only configuration is a useful comparison point and remains a stron
 
 ---
 
+## Experiment 26 – OW seed repeat (seed = 99)
+
+**Date:** 2026-05-20
+
+### Goal
+Further validate the selected main direction by testing the OW configuration under an additional random seed.
+
+### Setup
+- Model: oversampling + class-weighted loss
+- Same setup as Experiment 12
+- Random seed: 99
+- Evaluation threshold: 0.7
+
+### Results
+- Eval loss: 0.7563
+- Thresholded evaluation:
+  - Micro-F1: 0.4753
+  - Macro-F1: 0.4431
+  - Tail Recall: 0.6964
+- Max predicted probability on validation set: 0.9836
+- Mean predicted probability on validation set: 0.2040
+
+### Observations
+- The result remains in the same range as the earlier OW seed runs.
+- Micro-F1 is among the strongest observed values so far.
+- Macro-F1 remains strong, while tail recall stays high.
+- This further supports that the selected OW direction is stable across seeds.
+
+### Conclusion
+The additional seed repeat strengthens confidence in OW as the main experimental direction. The configuration continues to provide a strong and stable trade-off across the key metrics.
+
+---
+
+## Experiment 27 – Updated OW summary across runs
+
+**Date:** 2026-05-20
+
+### Goal
+Update the multi-run summary of the selected main direction after adding one more OW seed run.
+
+### Setup
+- Model: oversampling + class-weighted loss
+- Evaluation threshold: 0.7
+- Runs included:
+  - original
+  - seed = 123
+  - seed = 7
+  - seed = 42
+  - seed = 99
+
+### Results
+- Micro-F1: 0.4669 ± 0.0086
+- Macro-F1: 0.4381 ± 0.0097
+- Tail Recall: 0.7072 ± 0.0143
+
+### Observations
+- The updated OW summary remains highly stable across seeds.
+- The new seed run does not change the overall picture, but further reinforces it.
+- Tail recall remains consistently high with low variance.
+
+### Conclusion
+The additional run strengthens confidence that OW is a stable and robust main direction.
+
+---
+
+## Experiment 28 – Direct comparison of OW and weighted-only summaries
+
+**Date:** 2026-05-20
+
+### Goal
+Compare the two selected candidate directions directly using their current multi-run summaries.
+
+### Setup
+- Weighted-only summary:
+  - Micro-F1: 0.4496
+  - Macro-F1: 0.4231
+  - Tail Recall: 0.6267
+- OW summary:
+  - Micro-F1: 0.4669
+  - Macro-F1: 0.4381
+  - Tail Recall: 0.7072
+
+### Results
+- Delta Micro-F1: +0.0173
+- Delta Macro-F1: +0.0150
+- Delta Tail Recall: +0.0805
+
+### Observations
+- OW outperforms weighted-only in all three key metrics.
+- The largest improvement appears in Tail Recall.
+- Combined with the lower variance seen in the OW runs, this supports OW as the stronger main direction.
+
+### Conclusion
+The current evidence favors OW over weighted-only both in average performance and in stability, especially for the tail-focused objective.
+
+---
+
+## Experiment 29 – Visual comparison of OW and weighted-only multi-run summaries
+
+**Date:** 2026-05-21
+
+### Goal
+Create a visual comparison of the two selected candidate directions based on their multi-run summaries.
+
+### Setup
+- Weighted-only summary:
+  - Micro-F1: 0.4496 ± 0.0118
+  - Macro-F1: 0.4231 ± 0.0049
+  - Tail Recall: 0.6267 ± 0.0750
+- OW summary:
+  - Micro-F1: 0.4669 ± 0.0086
+  - Macro-F1: 0.4381 ± 0.0097
+  - Tail Recall: 0.7072 ± 0.0143
+
+### Observations
+- OW outperforms weighted-only in all three key metrics.
+- The largest difference appears in Tail Recall.
+- The Tail Recall variance is substantially smaller for OW than for weighted-only.
+- The visual comparison reinforces OW as the stronger and more stable main direction.
+
+### Conclusion
+The visual summary supports the same conclusion as the numeric comparison: OW is currently the preferred main direction, while weighted-only remains a useful control setup.
+
+---
+
+## Experiment 30 – Tail-label error breakdown on OW model
+
+**Date:** 2026-05-21
+
+### Goal
+Inspect label-level error patterns for the tail labels on the selected main direction (OW).
+
+### Setup
+- Model: oversampling + class-weighted loss
+- Evaluation threshold: 0.7
+- Metrics computed per tail label:
+  - support
+  - TP
+  - FP
+  - FN
+  - precision
+  - recall
+  - F1
+
+### Results
+- pride: support 4, TP 3, FP 1, FN 1, precision 0.7500, recall 0.7500, F1 0.7500
+- remorse: support 13, TP 12, FP 12, FN 1, precision 0.5000, recall 0.9231, F1 0.6486
+- fear: support 8, TP 6, FP 5, FN 2, precision 0.5455, recall 0.7500, F1 0.6316
+- embarrassment: support 5, TP 3, FP 4, FN 2, precision 0.4286, recall 0.6000, F1 0.5000
+- nervousness: support 2, TP 2, FP 6, FN 0, precision 0.2500, recall 1.0000, F1 0.4000
+- desire: support 8, TP 6, FP 16, FN 2, precision 0.2727, recall 0.7500, F1 0.4000
+- grief: support 1, TP 1, FP 18, FN 0, precision 0.0526, recall 1.0000, F1 0.1000
+- relief: support 1, TP 0, FP 7, FN 1, precision 0.0000, recall 0.0000, F1 0.0000
+
+### Observations
+- Tail-label performance is highly non-uniform.
+- Some rare labels, especially pride, remorse, and fear, are handled relatively well.
+- grief shows perfect recall but extremely poor precision, indicating severe overprediction.
+- relief is not learned reliably at all in this slice.
+- These results suggest that tail-label difficulty is not explained by rarity alone.
+
+### Conclusion
+The selected OW direction remains strong overall, but its tail-label behavior is heterogeneous. Some rare labels are already separated reasonably well, while others remain dominated by confusion and overprediction.
+
+---
+
+## Experiment 31 – False negative analysis for grief
+
+**Date:** 2026-05-21
+
+### Goal
+Check whether the OW model misses true grief examples.
+
+### Setup
+- Model: oversampling + class-weighted loss
+- Evaluation threshold: 0.7
+- Target label: grief
+
+### Results
+- Number of grief false negatives: 0
+
+### Observations
+- In this validation slice, the model did not miss the single true grief example.
+
+### Conclusion
+For grief, the main problem is not false negatives but false positives.
+
+---
+
+## Experiment 32 – False positive analysis for grief
+
+**Date:** 2026-05-21
+
+### Goal
+Inspect why the OW model overpredicts grief.
+
+### Setup
+- Model: oversampling + class-weighted loss
+- Evaluation threshold: 0.7
+- Target label: grief
+
+### Results
+- Number of grief false positives: 18
+
+### Example patterns
+Typical false positives included texts whose gold labels were closer to sadness or remorse, for example:
+- “I've never been this sad in my life!” → true: sadness
+- “Oh dear, The combination of drugs, alcohol and a cell phone has caused many regrets.” → true: remorse
+- “I miss those days.” → true: sadness
+- “I'm so sorry for your losses...” → true: caring, remorse
+
+### Observations
+- grief is often predicted together with sadness, remorse, and sometimes disappointment.
+- The model appears to activate grief for broadly negative or loss-related language, even when the gold label is not grief.
+- This suggests that the model has not learned a sufficiently narrow decision boundary for grief.
+
+### Conclusion
+The main grief failure mode is overprediction, not underdetection. grief appears to be semantically entangled with sadness- and remorse-like content.
+
+---
+
+## Experiment 33 – False negative analysis for relief
+
+**Date:** 2026-05-21
+
+### Goal
+Inspect whether the OW model fails to detect true relief examples.
+
+### Setup
+- Model: oversampling + class-weighted loss
+- Evaluation threshold: 0.7
+- Target label: relief
+
+### Results
+- Number of relief false negatives: 1
+
+### Example
+- “try going outside for a long painful walk”
+  - true: relief
+  - predicted: caring
+  - relief probability: 0.1015
+
+### Observations
+- The single true relief example in this slice was missed with low confidence.
+- This suggests that relief is not being robustly recognized in the current setting.
+
+### Conclusion
+relief remains a difficult label for the OW setup, with weak positive detection in this validation slice.
+
+---
+
+## Experiment 34 – False positive analysis for relief
+
+**Date:** 2026-05-21
+
+### Goal
+Inspect why the OW model overpredicts relief.
+
+### Setup
+- Model: oversampling + class-weighted loss
+- Evaluation threshold: 0.7
+- Target label: relief
+
+### Results
+- Number of relief false positives: 7
+
+### Example patterns
+Typical false positives included texts whose gold labels were closer to gratitude, joy, pride, admiration, or optimism, for example:
+- “Any response helps and makes me feel like I’m not alone....thank you❤️” → true: gratitude
+- “My blood pressure Edit: I'm just happy to be here.” → true: joy
+- “I had a monster panic attack myself... I guess I should be proud, too!” → true: pride
+- “Congrats, darling! ... I'm both happy for and proud of you” → true: excitement, joy, pride
+
+### Observations
+- relief is often predicted together with joy, pride, gratitude, admiration, or optimism.
+- The model appears to treat relief as a broader “positive emotional release” category.
+- This suggests strong semantic overlap in the learned representation.
+
+### Conclusion
+The main relief failure mode is semantic confusion with nearby positive labels rather than simple absence of signal.
+
+---
+
