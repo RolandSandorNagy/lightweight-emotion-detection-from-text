@@ -1518,3 +1518,115 @@ The main relief failure mode is semantic confusion with nearby positive labels r
 
 ---
 
+## Experiment 35 – Label-specific threshold sweep for grief
+
+**Date:** 2026-05-28
+
+### Goal
+Test whether the grief label can be improved by adjusting its threshold separately while keeping all other labels at the default OW threshold.
+
+### Setup
+- Model: oversampling + class-weighted loss
+- Default threshold for all labels: 0.7
+- Target label: grief
+- grief threshold tested: 0.70, 0.75, 0.80, 0.85, 0.90, 0.95
+
+### Results
+- At threshold 0.70:
+  - Micro-F1: 0.4572
+  - Macro-F1: 0.4277
+  - Tail Recall: 0.7216
+  - grief precision: 0.0526
+  - grief recall: 1.0000
+  - grief F1: 0.1000
+  - TP: 1, FP: 18, FN: 0
+
+- At threshold 0.90:
+  - Micro-F1: 0.4610
+  - Macro-F1: 0.4343
+  - Tail Recall: 0.7216
+  - grief precision: 0.1667
+  - grief recall: 1.0000
+  - grief F1: 0.2857
+  - TP: 1, FP: 5, FN: 0
+
+- At threshold 0.95:
+  - Micro-F1: 0.4614
+  - Macro-F1: 0.4241
+  - Tail Recall: 0.5966
+  - grief precision: 0.0000
+  - grief recall: 0.0000
+  - grief F1: 0.0000
+  - TP: 0, FP: 0, FN: 1
+
+### Observations
+- Increasing the grief threshold substantially reduces false positives.
+- Up to 0.90, recall remains unchanged while precision and F1 improve clearly.
+- At 0.95, the single true grief example is lost entirely.
+- This suggests that grief is at least partly a calibration problem rather than only a representation problem.
+
+### Conclusion
+Grief appears to benefit from targeted label-level threshold adjustment. A higher label-specific threshold improves grief precision and F1 without harming recall up to a point.
+
+---
+
+## Experiment 36 – Label-specific threshold sweep for relief
+
+**Date:** 2026-05-28
+
+### Goal
+Test whether the relief label can be improved by adjusting its threshold separately while keeping all other labels at the default OW threshold.
+
+### Setup
+- Model: oversampling + class-weighted loss
+- Default threshold for all labels: 0.7
+- Target label: relief
+- relief threshold tested: 0.30, 0.40, 0.50, 0.60, 0.70, 0.80, 0.90
+
+### Results
+Across all tested thresholds:
+- relief precision: 0.0000
+- relief recall: 0.0000
+- relief F1: 0.0000
+
+False positives decreased as the threshold increased:
+- FP = 45 at threshold 0.3
+- FP = 7 at threshold 0.7
+- FP = 0 at threshold 0.9
+
+However:
+- TP remained 0 throughout
+- FN remained 1 throughout
+
+### Observations
+- Changing the relief threshold only changes the number of false positives.
+- The model never recovers the single true relief example at any tested threshold.
+- This suggests that relief is not primarily a threshold-calibration problem.
+
+### Conclusion
+Relief does not benefit from simple label-specific threshold adjustment. Its difficulty likely comes from weak representation and/or semantic overlap with nearby positive labels.
+
+---
+
+## Experiment 37 – Visual comparison of label-specific threshold sweeps for grief and relief
+
+**Date:** 2026-05-28
+
+### Goal
+Visualize whether grief and relief respond differently to targeted label-level threshold adjustment.
+
+### Setup
+- Model: oversampling + class-weighted loss
+- Label-specific threshold sweeps for grief and relief
+- Precision, recall, and F1 plotted against threshold values
+
+### Observations
+- grief shows a meaningful precision/F1 improvement as the threshold increases up to around 0.90, while recall remains intact.
+- relief remains at zero precision, recall, and F1 across all tested thresholds.
+- The visual comparison reinforces that these two problematic tail labels fail for different reasons.
+
+### Conclusion
+The threshold-sweep plots support a differentiated view of tail-label difficulty: grief can be partly improved through calibration, while relief likely requires a different kind of intervention.
+
+---
+
