@@ -1630,3 +1630,207 @@ The threshold-sweep plots support a differentiated view of tail-label difficulty
 
 ---
 
+## Experiment 38 – Clipped positive weights for OW setup
+
+**Date:** 2026-06-04
+
+### Goal
+Test whether reducing the most extreme class weights helps mitigate overprediction in the selected OW setup.
+
+### Setup
+- Model: oversampling + class-weighted loss
+- Original positive weights:
+  - min: 2.2013
+  - max: 293.1667
+  - mean: 54.2542
+- Clipped positive weights:
+  - min: 2.2013
+  - max: 50.0
+  - mean: 31.9938
+
+### Observations
+- Clipping substantially reduced the most extreme class weights.
+- This provides a simple way to test whether some of the tail-label problems are caused by overly aggressive weighting.
+
+### Conclusion
+The clipped-weight setup provides a controlled variant of OW for testing whether milder weighting improves precision on problematic labels.
+
+---
+
+## Experiment 39 – OW with clipped class weights
+
+**Date:** 2026-06-04
+
+### Goal
+Evaluate whether clipping the positive class weights improves the OW setup.
+
+### Setup
+- Model: oversampling + class-weighted loss
+- Positive weights clipped to max = 50.0
+- Random seed: 1234
+- Evaluation threshold: 0.7
+
+### Results
+- Eval loss: 0.6602
+- Thresholded evaluation:
+  - Micro-F1: 0.4645
+  - Macro-F1: 0.4292
+  - Tail Recall: 0.4716
+- Max predicted probability on validation set: 0.9852
+- Mean predicted probability on validation set: 0.1995
+
+### Observations
+- Compared to the original OW setup, clipped weights slightly improved Micro-F1 and Macro-F1.
+- However, Tail Recall dropped substantially.
+- This suggests that the clipping was too aggressive for the tail-focused objective.
+
+### Conclusion
+Simple global clipping of class weights does not appear to be a good trade-off in its current form: it improves overall metrics slightly, but sacrifices too much tail recall.
+
+---
+
+## Experiment 39 – OW with clipped class weights
+
+**Date:** 2026-06-04
+
+### Goal
+Evaluate whether clipping the positive class weights improves the OW setup.
+
+### Setup
+- Model: oversampling + class-weighted loss
+- Positive weights clipped to max = 50.0
+- Random seed: 1234
+- Evaluation threshold: 0.7
+
+### Results
+- Eval loss: 0.6602
+- Thresholded evaluation:
+  - Micro-F1: 0.4645
+  - Macro-F1: 0.4292
+  - Tail Recall: 0.4716
+- Max predicted probability on validation set: 0.9852
+- Mean predicted probability on validation set: 0.1995
+
+### Observations
+- Compared to the original OW setup, clipped weights slightly improved Micro-F1 and Macro-F1.
+- However, Tail Recall dropped substantially.
+- This suggests that the clipping was too aggressive for the tail-focused objective.
+
+### Conclusion
+Simple global clipping of class weights does not appear to be a good trade-off in its current form: it improves overall metrics slightly, but sacrifices too much tail recall.
+
+---
+
+## Experiment 41 – Overall comparison: original OW vs clipped-weight OW
+
+**Date:** 2026-06-04
+
+### Goal
+Compare the overall behavior of the original OW setup and the clipped-weight variant.
+
+### Setup
+- Original OW:
+  - Micro-F1: 0.4572
+  - Macro-F1: 0.4277
+  - Tail Recall: 0.7216
+- Clipped-weight OW:
+  - Micro-F1: 0.4645
+  - Macro-F1: 0.4292
+  - Tail Recall: 0.4716
+
+### Results
+- Delta Micro-F1: +0.0073
+- Delta Macro-F1: +0.0015
+- Delta Tail Recall: -0.2500
+
+### Observations
+- Clipping yields a small gain in overall metrics.
+- However, the tail recall drop is large.
+- For the current research focus, this trade-off is unfavorable.
+
+### Conclusion
+The clipped-weight OW variant is not preferable to the original OW setup under the current tail-focused objective.
+
+---
+
+## Experiment 42 – Grief threshold sweep on clipped-weight OW model
+
+**Date:** 2026-06-05
+
+### Goal
+Check whether the loss of grief recall in the clipped-weight OW model can be recovered by lowering the grief-specific threshold.
+
+### Setup
+- Model: clipped-weight OW
+- Default threshold for all labels: 0.7
+- Target label: grief
+- grief threshold tested: 0.30, 0.40, 0.50, 0.60, 0.70
+
+### Results
+- At threshold 0.70:
+  - Micro-F1: 0.4645
+  - Macro-F1: 0.4292
+  - Tail Recall: 0.4716
+  - grief precision: 0.0000
+  - grief recall: 0.0000
+  - grief F1: 0.0000
+  - TP: 0, FP: 1, FN: 1
+
+- At threshold 0.50:
+  - Micro-F1: 0.4618
+  - Macro-F1: 0.4340
+  - Tail Recall: 0.5966
+  - grief precision: 0.0714
+  - grief recall: 1.0000
+  - grief F1: 0.1333
+  - TP: 1, FP: 13, FN: 0
+
+- At threshold 0.40:
+  - Micro-F1: 0.4612
+  - Macro-F1: 0.4334
+  - Tail Recall: 0.5966
+  - grief precision: 0.0625
+  - grief recall: 1.0000
+  - grief F1: 0.1176
+  - TP: 1, FP: 15, FN: 0
+
+### Observations
+- Lowering the grief-specific threshold on the clipped model does recover the true grief example.
+- However, this also reintroduces many false positives.
+- Even after recovery, the clipped model remains weaker on grief than the original OW model with targeted thresholding.
+
+### Conclusion
+The clipped-weight OW model can recover grief recall through label-specific threshold adjustment, but this does not outperform the original OW setup. For grief, targeted calibration on the original OW model appears more promising than global weight clipping.
+
+---
+
+## Experiment 43 – Comparison of grief threshold sweeps: original OW vs clipped-weight OW
+
+**Date:** 2026-06-05
+
+### Goal
+Compare whether grief is handled better by the original OW setup or by the clipped-weight OW setup after label-specific threshold adjustment.
+
+### Setup
+- Compare grief threshold sweeps on:
+  - original OW
+  - clipped-weight OW
+
+### Observations
+- In the original OW model, the best grief trade-off appears around threshold 0.90:
+  - precision 0.1667
+  - recall 1.0000
+  - F1 0.2857
+  - FP = 5
+
+- In the clipped-weight OW model, the best grief recovery appears around threshold 0.50:
+  - precision 0.0714
+  - recall 1.0000
+  - F1 0.1333
+  - FP = 13
+
+### Conclusion
+For grief, the original OW model with targeted threshold adjustment remains clearly better than the clipped-weight OW variant. This suggests that simple global clipping is not the right fix for this label.
+
+---
+
