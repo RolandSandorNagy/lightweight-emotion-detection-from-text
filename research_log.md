@@ -1834,3 +1834,147 @@ For grief, the original OW model with targeted threshold adjustment remains clea
 
 ---
 
+## Experiment 44 – Relief false positive true-label frequency analysis
+
+**Date:** 2026-06-15
+
+### Goal
+Quantify which true labels appear most often among the relief false positives in the OW model.
+
+### Setup
+- Model: oversampling + class-weighted loss
+- Evaluation threshold: 0.7
+- Target label: relief
+- Analysis restricted to false positive relief predictions
+
+### Results
+Number of relief false positives: 7
+
+True-label frequencies among relief false positives:
+- pride: 3
+- joy: 2
+- admiration: 1
+- caring: 1
+- excitement: 1
+- gratitude: 1
+- remorse: 1
+
+### Observations
+- relief false positives are dominated by nearby positive labels, especially pride and joy.
+- The qualitative examples also show overlap with gratitude, admiration, and excitement.
+- This supports the earlier hypothesis that relief is not mainly a threshold problem, but a semantic confusion problem with nearby positive emotional categories.
+
+### Conclusion
+The current OW model tends to use relief as a broader “positive emotional release” label, which causes systematic confusion with pride-, joy-, and gratitude-like examples.
+
+---
+
+## Experiment 45 – Grief best-threshold summary
+
+**Date:** 2026-06-15
+
+### Goal
+Summarize the current best label-specific threshold candidate for grief on the original OW model.
+
+### Setup
+- Model: original oversampling + class-weighted loss
+- Grief label-specific threshold sweep reused from Experiment 35
+- Selection criteria:
+  - best grief F1
+  - best macro-F1 while keeping full grief recall
+
+### Results
+Both selection criteria identified the same threshold:
+
+- Recommended grief threshold: 0.90
+- Micro-F1: 0.4610
+- Macro-F1: 0.4343
+- Tail Recall: 0.7216
+- grief precision: 0.1667
+- grief recall: 1.0000
+- grief F1: 0.2857
+- TP: 1
+- FP: 5
+- FN: 0
+
+### Observations
+- The same threshold is selected both by grief-F1 and by macro-F1 under full grief recall.
+- This gives a clear and stable current candidate for grief-specific calibration.
+- Compared to the clipped-weight branch, the original OW model remains better for grief when targeted thresholding is used.
+
+### Conclusion
+For grief, the current best direction is the original OW setup with label-specific threshold 0.90.
+
+---
+
+## Experiment 46 – Targeted grief calibration candidate
+
+**Date:** 2026-06-15
+
+### Goal
+Test whether applying the currently best grief-specific threshold candidate improves the overall OW setup compared to the default global threshold.
+
+### Setup
+- Model: original oversampling + class-weighted loss
+- Baseline setup: global threshold = 0.70
+- Candidate setup: grief threshold = 0.90, all other labels = 0.70
+
+### Results
+- OW global 0.70:
+  - Micro-F1: 0.4572
+  - Macro-F1: 0.4277
+  - Tail Recall: 0.7216
+  - grief precision: 0.0526
+  - grief recall: 1.0000
+  - grief F1: 0.1000
+  - grief TP/FP/FN: 1 / 18 / 0
+
+- OW grief 0.90:
+  - Micro-F1: 0.4610
+  - Macro-F1: 0.4343
+  - Tail Recall: 0.7216
+  - grief precision: 0.1667
+  - grief recall: 1.0000
+  - grief F1: 0.2857
+  - grief TP/FP/FN: 1 / 5 / 0
+
+### Observations
+- Applying grief = 0.90 improves both Micro-F1 and Macro-F1 while preserving Tail Recall.
+- grief precision and grief F1 improve substantially.
+- False positives for grief drop strongly, while the true positive is preserved.
+
+### Conclusion
+A targeted grief-specific threshold of 0.90 is currently a strong candidate calibration setting on top of the original OW model.
+
+---
+
+## Experiment 47 – Relief false positive co-predicted label analysis
+
+**Date:** 2026-06-15
+
+### Goal
+Quantify which labels the model most often predicts together with relief in relief false positive cases.
+
+### Setup
+- Model: original oversampling + class-weighted loss
+- Evaluation threshold: 0.7
+- Analysis restricted to relief false positives
+
+### Results
+Co-predicted label frequencies among relief false positives:
+- joy: 5
+- pride: 5
+- admiration: 4
+- gratitude: 4
+- excitement: 2
+- optimism: 1
+- remorse: 1
+- sadness: 1
+
+### Observations
+- relief false positives are most strongly associated with joy-, pride-, admiration-, and gratitude-like predictions.
+- The qualitative examples support the same pattern.
+- This indicates that the model tends to use relief as part of a broader positive emotional release cluster.
+
+### Conclusion
+The current OW model’s relief errors are consistent with semantic confusion among nearby positive labels, rather than simple threshold miscalibration.
