@@ -1978,3 +1978,110 @@ Co-predicted label frequencies among relief false positives:
 
 ### Conclusion
 The current OW model’s relief errors are consistent with semantic confusion among nearby positive labels, rather than simple threshold miscalibration.
+
+---
+
+## Experiment 48 – Relief positive-cluster summary
+
+**Date:** 2026-06-30
+
+### Goal
+Quantify whether the relief false positive cases in the OW model are concentrated around a nearby positive label cluster.
+
+### Setup
+- Model: original oversampling + class-weighted loss
+- Evaluation threshold: 0.7
+- Target label: relief
+- Positive cluster used for analysis:
+  - joy
+  - pride
+  - admiration
+  - gratitude
+  - excitement
+  - optimism
+
+### Results
+- In relief false positive cases, the proportion of true labels belonging to the positive cluster is:
+  - 8 / 10 = 0.800
+- In relief false positive cases, the proportion of co-predicted labels belonging to the positive cluster is:
+  - 21 / 23 = 0.913
+
+### Observations
+- Most relief false positives occur in examples whose true labels already belong to a nearby positive cluster.
+- Even more strongly, the model’s co-predictions in these cases are overwhelmingly drawn from the same positive cluster.
+- This supports the interpretation that relief errors are structured and non-random.
+
+### Conclusion
+The relief false positives are strongly concentrated around a nearby positive emotional cluster, suggesting that the main problem is semantic confusion rather than threshold miscalibration.
+
+---
+
+## Experiment 49 – Grief candidate delta summary
+
+**Date:** 2026-06-30
+
+### Goal
+Summarize the overall effect of applying the grief-specific threshold candidate (`grief = 0.90`) compared to the baseline global threshold setup.
+
+### Setup
+- Baseline: original OW model with global threshold = 0.70
+- Candidate: original OW model with grief threshold = 0.90 and all other labels = 0.70
+
+### Results
+Baseline (`OW_global_0.70`):
+- Micro-F1: 0.4572
+- Macro-F1: 0.4277
+- Tail Recall: 0.7216
+- grief precision: 0.0526
+- grief recall: 1.0000
+- grief F1: 0.1000
+- grief TP/FP/FN: 1 / 18 / 0
+
+Candidate (`OW_grief_0.90`):
+- Micro-F1: 0.4610
+- Macro-F1: 0.4343
+- Tail Recall: 0.7216
+- grief precision: 0.1667
+- grief recall: 1.0000
+- grief F1: 0.2857
+- grief TP/FP/FN: 1 / 5 / 0
+
+Delta (candidate − baseline):
+- Micro-F1: +0.0038
+- Macro-F1: +0.0066
+- Tail Recall: +0.0000
+- grief precision: +0.1140
+- grief recall: +0.0000
+- grief F1: +0.1857
+- grief FP: -13
+
+### Observations
+- The grief-specific candidate improves both Micro-F1 and Macro-F1.
+- Tail Recall remains unchanged.
+- grief precision and grief F1 improve substantially.
+- The number of grief false positives drops strongly while preserving the true positive example.
+
+### Conclusion
+The `grief = 0.90` label-specific calibration is currently a strong candidate refinement of the original OW setup.
+
+---
+
+## Related Work Note – Comparison to *Handling Class Imbalance in Dimensional Emotion Recognition with Parameter-Efficient Fine-Tuning*
+
+**Date:** 2026-06-30
+
+### Goal
+Relate the current findings of this project to a recent thesis on imbalance handling in dimensional emotion recognition.
+
+### Observations
+- The reviewed thesis studies imbalance in VAD regression, while the current project studies imbalance in multi-label emotion classification.
+- Despite the task difference, both works suggest that imbalance is not only a simple frequency problem: the structure of the emotion / label space also matters.
+- In the reviewed thesis, class-frequency weighting is weaker than structure-aware weighting in the continuous affective space.
+- This is consistent with the current project’s finding that weighted-only training helps, but does not fully resolve the hardest tail-label cases.
+- The current results further suggest that problematic tail labels are heterogeneous: grief behaves more like a calibration problem, whereas relief behaves more like a semantic confusion problem with nearby positive labels.
+
+### Conclusion
+The reviewed thesis supports the broader interpretation that imbalance handling should not be treated purely as class-frequency correction. In the current project as well, label-space structure and confusion patterns appear central to the remaining tail-label errors.
+
+---
+
