@@ -1689,39 +1689,7 @@ Simple global clipping of class weights does not appear to be a good trade-off i
 
 ---
 
-## Experiment 39 – OW with clipped class weights
-
-**Date:** 2026-06-04
-
-### Goal
-Evaluate whether clipping the positive class weights improves the OW setup.
-
-### Setup
-- Model: oversampling + class-weighted loss
-- Positive weights clipped to max = 50.0
-- Random seed: 1234
-- Evaluation threshold: 0.7
-
-### Results
-- Eval loss: 0.6602
-- Thresholded evaluation:
-  - Micro-F1: 0.4645
-  - Macro-F1: 0.4292
-  - Tail Recall: 0.4716
-- Max predicted probability on validation set: 0.9852
-- Mean predicted probability on validation set: 0.1995
-
-### Observations
-- Compared to the original OW setup, clipped weights slightly improved Micro-F1 and Macro-F1.
-- However, Tail Recall dropped substantially.
-- This suggests that the clipping was too aggressive for the tail-focused objective.
-
-### Conclusion
-Simple global clipping of class weights does not appear to be a good trade-off in its current form: it improves overall metrics slightly, but sacrifices too much tail recall.
-
----
-
-## Experiment 41 – Overall comparison: original OW vs clipped-weight OW
+## Experiment 40 – Overall comparison: original OW vs clipped-weight OW
 
 **Date:** 2026-06-04
 
@@ -1753,7 +1721,7 @@ The clipped-weight OW variant is not preferable to the original OW setup under t
 
 ---
 
-## Experiment 42 – Grief threshold sweep on clipped-weight OW model
+## Experiment 41 – Grief threshold sweep on clipped-weight OW model
 
 **Date:** 2026-06-05
 
@@ -1804,7 +1772,7 @@ The clipped-weight OW model can recover grief recall through label-specific thre
 
 ---
 
-## Experiment 43 – Comparison of grief threshold sweeps: original OW vs clipped-weight OW
+## Experiment 42 – Comparison of grief threshold sweeps: original OW vs clipped-weight OW
 
 **Date:** 2026-06-05
 
@@ -1834,7 +1802,7 @@ For grief, the original OW model with targeted threshold adjustment remains clea
 
 ---
 
-## Experiment 44 – Relief false positive true-label frequency analysis
+## Experiment 43 – Relief false positive true-label frequency analysis
 
 **Date:** 2026-06-15
 
@@ -1869,7 +1837,7 @@ The current OW model tends to use relief as a broader “positive emotional rele
 
 ---
 
-## Experiment 45 – Grief best-threshold summary
+## Experiment 44 – Grief best-threshold summary
 
 **Date:** 2026-06-15
 
@@ -1907,7 +1875,7 @@ For grief, the current best direction is the original OW setup with label-specif
 
 ---
 
-## Experiment 46 – Targeted grief calibration candidate
+## Experiment 45 – Targeted grief calibration candidate
 
 **Date:** 2026-06-15
 
@@ -1948,7 +1916,7 @@ A targeted grief-specific threshold of 0.90 is currently a strong candidate cali
 
 ---
 
-## Experiment 47 – Relief false positive co-predicted label analysis
+## Experiment 46 – Relief false positive co-predicted label analysis
 
 **Date:** 2026-06-15
 
@@ -1981,7 +1949,7 @@ The current OW model’s relief errors are consistent with semantic confusion am
 
 ---
 
-## Experiment 48 – Relief positive-cluster summary
+## Experiment 47 – Relief positive-cluster summary
 
 **Date:** 2026-06-30
 
@@ -2016,7 +1984,7 @@ The relief false positives are strongly concentrated around a nearby positive em
 
 ---
 
-## Experiment 49 – Grief candidate delta summary
+## Experiment 48 – Grief candidate delta summary
 
 **Date:** 2026-06-30
 
@@ -2082,6 +2050,298 @@ Relate the current findings of this project to a recent thesis on imbalance hand
 
 ### Conclusion
 The reviewed thesis supports the broader interpretation that imbalance handling should not be treated purely as class-frequency correction. In the current project as well, label-space structure and confusion patterns appear central to the remaining tail-label errors.
+
+---
+
+## Experiment 49 – Full GoEmotions dataset and label-space audit
+
+**Date:** 2026-09-10
+
+### Goal
+Re-evaluate the dataset assumptions behind the earlier tail-label experiments using the complete GoEmotions simplified dataset, and inspect whether the emotion labels show structured and potentially asymmetric relationships.
+
+### Setup
+- Dataset: complete GoEmotions simplified dataset
+- Splits:
+  - train: 43,410 examples
+  - validation: 5,426 examples
+  - test: 5,427 examples
+- Number of labels: 28
+- No model training was performed in this experiment.
+- Analyses:
+  - per-label support across train / validation / test
+  - verification of the previously selected tail labels
+  - number of labels per example
+  - train-set label co-occurrence matrix
+  - directional conditional co-occurrence probabilities
+  - qualitative inspection of selected grief, relief, remorse, and sadness examples
+
+### Results
+
+#### Tail-label support on the complete dataset
+
+| Label | Train | Validation | Test | Total |
+|---|---:|---:|---:|---:|
+| grief | 77 | 13 | 6 | 96 |
+| pride | 111 | 15 | 16 | 142 |
+| relief | 153 | 18 | 11 | 182 |
+| nervousness | 164 | 21 | 23 | 208 |
+| embarrassment | 303 | 35 | 37 | 375 |
+| remorse | 545 | 68 | 56 | 669 |
+| fear | 596 | 90 | 78 | 764 |
+| desire | 641 | 77 | 83 | 801 |
+
+The eight least frequent non-neutral labels on the complete training split are exactly the same eight labels used in the previous experiments:
+- grief
+- pride
+- relief
+- nervousness
+- embarrassment
+- remorse
+- fear
+- desire
+
+#### Number of labels per example
+
+Training split:
+- 1 label: 36,308 examples (83.64%)
+- 2 labels: 6,541 examples (15.07%)
+- 3 labels: 532 examples (1.23%)
+- 4 labels: 28 examples (0.06%)
+- 5 labels: 1 example
+
+Mean number of labels per example:
+- train: 1.177
+- validation: 1.176
+- test: 1.166
+
+This shows that although GoEmotions is a multi-label dataset, most examples contain only one annotated label.
+
+#### Selected directional label relationships
+
+- grief → sadness:
+  - co-occurrence: 22
+  - P(sadness | grief) = 0.2857
+  - P(grief | sadness) = 0.0166
+
+- remorse → sadness:
+  - co-occurrence: 60
+  - P(sadness | remorse) = 0.1101
+  - P(remorse | sadness) = 0.0452
+
+- nervousness → fear:
+  - co-occurrence: 34
+  - P(fear | nervousness) = 0.2073
+  - P(nervousness | fear) = 0.0570
+
+- pride → admiration:
+  - co-occurrence: 23
+  - P(admiration | pride) = 0.2072
+  - P(pride | admiration) = 0.0056
+
+- relief → joy:
+  - co-occurrence: 9
+  - P(joy | relief) = 0.0588
+  - P(relief | joy) = 0.0062
+
+- relief → gratitude:
+  - co-occurrence: 10
+  - P(gratitude | relief) = 0.0654
+  - P(relief | gratitude) = 0.0038
+
+- relief and pride did not co-occur in the training split.
+
+### Qualitative observations
+
+- grief + sadness examples are mostly clearly related to death, loss, missing someone, condolences, or other loss-related negative experiences.
+- This supports the interpretation that grief and sadness are related, but grief appears to be a more specific category. The strong asymmetry between P(sadness | grief) and P(grief | sadness) is consistent with this interpretation.
+
+- relief examples often describe a negative, uncertain, or stressful situation becoming resolved or less threatening.
+- relief sometimes co-occurs with joy or gratitude, but the co-occurrence rates are relatively low.
+- This is notable because earlier OW-model error analysis showed that relief false positives were often associated with joy, pride, gratitude, admiration, and other nearby positive labels.
+
+- remorse examples frequently contain expressions such as “sorry”, “apologies”, or “regret”.
+- Some of these examples appear closer to apology, politeness, sympathy, or acknowledgement of a mistake than to a narrow psychological interpretation of remorse.
+- This suggests that the discrete annotation labels may contain semantic overlap and annotation-related ambiguity.
+
+### Observations
+- The earlier 5000/500 subset substantially underestimated the available support for the rarest labels. In particular, the full validation split contains 13 grief and 18 relief examples instead of only one example each.
+- The previous tail-label selection remains valid on the complete training dataset.
+- Strong label imbalance remains present even with the complete dataset.
+- Most samples contain only one annotated label, which limits how directly label co-occurrence can be interpreted as the full relationship between underlying emotions.
+- Several label relationships are clearly asymmetric, suggesting that simple symmetric similarity between labels may not fully describe the structure of the emotion space.
+- The qualitative examples indicate that some discrete labels have overlapping or context-dependent meanings.
+
+### Conclusion
+The full-dataset audit confirms that the previously selected tail labels are appropriate, but also shows that the earlier detailed grief and relief conclusions were based on unnecessarily small validation support and should be re-evaluated using the complete dataset.
+
+The label-space analysis provides initial evidence that emotion-label relationships are structured and often asymmetric. In addition, the qualitative examples suggest that some discrete labels do not correspond to completely isolated emotional categories.
+
+These findings support the next research direction: first re-establish the baseline models on the complete GoEmotions dataset, and then investigate whether a representation or inference method that incorporates continuous or structured relationships between emotion labels can improve the handling of rare and semantically overlapping labels.
+
+---
+
+## Experiment 50 – Full-dataset plain DistilBERT baseline
+
+**Date:** 2026-09-10
+
+### Goal
+Establish a stronger and more reliable plain DistilBERT baseline using the complete official GoEmotions train, validation and test splits.
+
+The earlier baseline experiments were based mainly on a 5,000-example training subset and a 500-example validation subset, which provided very limited support for the rarest labels.
+
+### Setup
+- Dataset: GoEmotions simplified
+- Train size: 43,410
+- Validation size: 5,426
+- Test size: 5,427
+- Model: distilbert-base-uncased
+- Task: 28-label multi-label classification
+- Loss: BCEWithLogitsLoss
+- Epochs: 3
+- Batch size: 16
+- Learning rate: 2e-5
+- Maximum sequence length: 128
+- Random seed: 42
+- Threshold selection: validation Macro-F1
+- Test split used only after threshold selection
+
+### Training results
+
+| Epoch | Training loss | Validation loss |
+|---|---:|---:|
+| 1 | 0.093426 | 0.088851 |
+| 2 | 0.081178 | 0.084007 |
+| 3 | 0.072051 | 0.084055 |
+
+The lowest validation loss was reached after epoch 2, so the corresponding checkpoint was selected as the final model.
+
+### Validation threshold sweep
+
+The best global threshold according to validation Macro-F1 was 0.15.
+
+At threshold = 0.15:
+- Micro-F1: 0.5791
+- Macro-F1: 0.4712
+- Tail Precision: 0.3757
+- Tail Recall: 0.3482
+- Tail F1: 0.3467
+
+### Test results
+
+Using the validation-selected threshold of 0.15:
+
+- Micro-F1: 0.5739
+- Macro-F1: 0.4626
+- Tail Precision: 0.3380
+- Tail Recall: 0.3374
+- Tail F1: 0.3212
+
+### Observations
+- Training on the complete dataset produces a substantially stronger plain baseline than the earlier subset-based experiments.
+- Validation performance stabilizes after approximately two epochs.
+- The optimal global threshold for the plain model is 0.15, which is much lower than the threshold previously used for the weighted / OW models.
+- Validation and test performance are relatively close, suggesting that the selected threshold generalizes reasonably well.
+- Tail-label performance remains considerably weaker than overall performance, despite the much larger training set.
+- This confirms that increased training support helps rare-label recognition substantially, but does not eliminate the tail-label problem.
+
+### Conclusion
+The complete-dataset plain DistilBERT model provides a substantially stronger and more reliable baseline than the earlier subset-based experiments.
+
+The model achieves good overall performance, but tail-label performance remains substantially lower, leaving room for imbalance-aware methods such as oversampling and class-weighted loss.
+
+The next step is to train the OW configuration on the same complete dataset and compare it directly against this baseline under the same validation/test protocol.
+
+---
+
+## Experiment 51 – Full-dataset OW baseline
+
+**Date:** 2026-09-10
+
+### Goal
+Evaluate the oversampling + class-weighted loss (OW) configuration on the complete GoEmotions dataset using the same training and evaluation protocol as the full-dataset plain baseline.
+
+### Setup
+- Dataset: GoEmotions simplified
+- Original train size: 43,410
+- OW train size after tail-example oversampling: 45,943
+- Validation size: 5,426
+- Test size: 5,427
+- Model: distilbert-base-uncased
+- Task: 28-label multi-label classification
+- Tail-containing examples duplicated once
+- Loss: BCEWithLogitsLoss with class-dependent positive weights
+- Positive weights computed from the oversampled training set
+- pos_weight range:
+  - min: 2.2119
+  - max: 297.3312
+  - mean: 54.5409
+- Epochs: 3
+- Batch size: 16
+- Learning rate: 2e-5
+- Maximum sequence length: 128
+- Random seed: 42
+- Threshold selection: validation Macro-F1
+- Test split used only after threshold selection
+
+### Training results
+
+| Epoch | Training loss | Validation loss |
+|---|---:|---:|
+| 1 | 0.629487 | 0.590996 |
+| 2 | 0.506744 | 0.570996 |
+| 3 | 0.412403 | 0.595926 |
+
+The lowest validation loss was reached after epoch 2, so the corresponding checkpoint was selected as the final model.
+
+### Validation threshold sweep
+
+The best global threshold according to validation Macro-F1 was 0.90.
+
+At threshold = 0.90:
+- Micro-F1: 0.5025
+- Macro-F1: 0.4895
+- Tail Precision: 0.3972
+- Tail Recall: 0.6254
+- Tail F1: 0.4747
+
+### Test results
+
+Using the validation-selected threshold of 0.90:
+
+- Micro-F1: 0.4913
+- Macro-F1: 0.4721
+- Tail Precision: 0.3308
+- Tail Recall: 0.5986
+- Tail F1: 0.4122
+
+### Comparison with full-dataset plain baseline
+
+| Metric | Plain | OW |
+|---|---:|---:|
+| Threshold | 0.15 | 0.90 |
+| Micro-F1 | 0.5739 | 0.4913 |
+| Macro-F1 | 0.4626 | 0.4721 |
+| Tail Precision | 0.3380 | 0.3308 |
+| Tail Recall | 0.3374 | 0.5986 |
+| Tail F1 | 0.3212 | 0.4122 |
+
+### Observations
+- OW substantially improves rare-label recall on the complete dataset.
+- Tail Recall increases from 0.3374 to 0.5986.
+- Tail F1 also improves clearly, from 0.3212 to 0.4122.
+- Macro-F1 improves slightly.
+- Micro-F1 decreases substantially, indicating that the increased tail sensitivity comes at a cost in overall prediction quality.
+- Tail Precision remains similar between the two models.
+- The optimal global threshold for OW is much higher than for the plain model (0.90 vs 0.15), confirming that class-weighted training strongly shifts the output score distribution.
+- The result shows that OW remains effective for the rare-label objective even when much more training data is available, but the trade-off with overall performance is stronger than the earlier subset-based experiments suggested.
+
+### Conclusion
+On the complete GoEmotions dataset, OW provides a clear improvement in rare-label detection compared with the plain DistilBERT baseline.
+
+The strongest gain is in Tail Recall and Tail F1, while Micro-F1 decreases substantially. Therefore, OW should not be interpreted as a universally better model, but as a tail-focused configuration that trades some overall performance for substantially stronger rare-label sensitivity.
+
+These results provide a stronger full-dataset baseline for the next stage of the project, where structured or continuous emotion-label relationships can be investigated as a possible way to improve difficult tail labels without relying only on more aggressive imbalance correction.
 
 ---
 
